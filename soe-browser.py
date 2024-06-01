@@ -311,7 +311,7 @@ def main():
     st.sidebar.markdown(
         """
         <div class="normal-text" style="margin-top: 20px">
-        Interactive data explorer based on <a href="https://eiti.org" target="_blank">EITI data</a>. 
+        Unofficial tnteractive data explorer based on <a href="https://eiti.org" target="_blank">EITI data</a>. 
         By <a href="https://civicliteraci.es" target="_blank">Civic Literacy Initiative</a>.
         </div>
         """, 
