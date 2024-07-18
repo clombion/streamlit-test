@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from urllib.request import Request, urlopen
 
 # -----------------------------
 # Data Loading Module
@@ -8,30 +9,33 @@ import altair as alt
 
 @st.cache_data
 def load_data(url):
-    return pd.read_csv(url, on_bad_lines='skip').drop(columns=['rowid'], errors='ignore')
+    req = Request(url)
+    req.add_header('User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:77.0) Gecko/20100101 Firefox/77.0')
+    content = urlopen(req)
+    return pd.read_csv(content, on_bad_lines='skip').drop(columns=['rowid'], errors='ignore')
 
 def set_index(dataframe, column):
     dataframe.set_index(column, inplace=True)
 
 # URLs to datasets
-declaration_about_url = 'http://35.228.140.89/eiti_database/declaration_about.csv?_size=max'
-declaration_agencies_url = 'http://35.228.140.89/eiti_database/declaration_agencies.csv?_size=max'
-declaration_companies_url = 'http://35.228.140.89/eiti_database/declaration_companies.csv?_size=max'
-declaration_projects_url = 'http://35.228.140.89/eiti_database/declaration_projects.csv?_size=max'
+about_url = 'https://soe-database.eiti.org/eiti_database/about.csv?_size=max'
+agencies_url = 'https://soe-database.eiti.org/eiti_database/agencies.csv?_size=max'
+companies_url = 'https://soe-database.eiti.org/eiti_database/companies.csv?_size=max'
+projects_url = 'https://soe-database.eiti.org/eiti_database/projects.csv?_size=max'
 countries_svg_url = 'https://raw.githubusercontent.com/clombion/streamlit-test/main/countries_svg.csv'
 
 # Load datasets
-declaration_about = load_data(declaration_about_url)
-declaration_agencies = load_data(declaration_agencies_url)
-declaration_companies = load_data(declaration_companies_url)
-declaration_projects = load_data(declaration_projects_url)
+about = load_data(about_url)
+agencies = load_data(agencies_url)
+companies = load_data(companies_url)
+projects = load_data(projects_url)
 countries_svg = load_data(countries_svg_url)
 
 # Set the year as the index for all datasets
-set_index(declaration_about, 'start_date')
-set_index(declaration_agencies, 'start_date')
-set_index(declaration_companies, 'start_date')
-set_index(declaration_projects, 'start_date')
+set_index(about, 'start_date')
+set_index(agencies, 'start_date')
+set_index(companies, 'start_date')
+set_index(projects, 'start_date')
 
 # -----------------------------
 # Styling Module
@@ -118,7 +122,7 @@ def sidebar():
     st.sidebar.markdown('<div class="sidebar-title" style="font-size: 1.5em;">EITI DATA EXPLORER</div>', unsafe_allow_html=True)
     
     # Sidebar for country selection
-    country_list = declaration_about['country_or_area_name'].unique()
+    country_list = about['country_or_area_name'].unique()
     selected_country = st.sidebar.selectbox('Select a Country', country_list)
     
     # Display SVG for selected country
@@ -156,10 +160,10 @@ def display_country_svg(selected_country):
 
 def display_country_report(selected_country):
     # Filter data for selected country
-    country_data = declaration_about[declaration_about['country_or_area_name'] == selected_country]
-    country_agencies = declaration_agencies[declaration_agencies['country'] == selected_country]
-    country_companies = declaration_companies[declaration_companies['country'] == selected_country]
-    country_projects = declaration_projects[declaration_projects['country'] == selected_country]
+    country_data = about[about['country_or_area_name'] == selected_country]
+    country_agencies = agencies[agencies['country'] == selected_country]
+    country_companies = companies[companies['country'] == selected_country]
+    country_projects = projects[projects['country'] == selected_country]
 
     # Count unique companies and projects
     unique_companies = country_companies.drop_duplicates(subset='eiti_id_company').shape[0]
